@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#0b1d33" />
+  <meta name="description" content="Yarısı gökyüzü, yarısı yeşil toprak: 2B uçak bombardıman oyunu." />
+  <title>Gök Avcı — 2B Bombardıman</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2379c8f0'/%3E%3Crect y='36' width='64' height='28' fill='%2358a437'/%3E%3Cpath d='M8 30h30l8-6 6 2-6 6H8z' fill='%23fff4dc'/%3E%3Ccircle cx='43' cy='32' r='3' fill='%23e6382f'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main id="game-shell">
+    <canvas id="game" aria-label="Gök Avcı oyun alanı"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <header class="hud">
+      <div class="hud-group">
+        <div class="stat stat--score">
+          <span class="stat-label">PUAN</span>
+          <span class="stat-value" id="score">0000</span>
+        </div>
+        <div class="stat stat--wave">
+          <span class="stat-label">DALGA</span>
+          <span class="stat-value" id="wave">01</span>
+        </div>
+      </div>
+
+      <div class="hud-group hud-group--right">
+        <div class="stat stat--ammo" id="ammoStat">
+          <svg class="bomb-glyph" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2.5c.9 0 1.6.7 1.6 1.6v1h1.6l-.7 2.6c2.7 1.2 4.5 3.7 4.5 6.6 0 4.1-3.1 7.2-7 7.2s-7-3.1-7-7.2c0-2.9 1.8-5.4 4.5-6.6l-.7-2.6h1.6v-1c0-.9.7-1.6 1.6-1.6Z" fill="currentColor"/>
+            <path d="M10.6 2.5h2.8v2.6h-2.8z" fill="currentColor"/>
+          </svg>
+          <span class="stat-label">BOMBA</span>
+          <span class="stat-value" id="ammo">24</span>
+        </div>
+        <button class="icon-btn" id="pauseBtn" type="button" aria-label="Oyunu duraklat" title="Duraklat (P)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5h3v14H8zM13 5h3v14h-3z" fill="currentColor"/></svg>
+        </button>
+        <button class="icon-btn" id="soundBtn" type="button" aria-label="Sesi kapat" title="Ses (M)">
+          <svg class="icon-on" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/>
+            <path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <svg class="icon-off" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/>
+            <path d="m16 9 5 6m0-6-5 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <p class="hint" id="hint">
+      <kbd>WASD</kbd> / <kbd>← ↑ ↓ →</kbd> uç
+      <span class="dot">·</span>
+      <kbd>Boşluk</kbd> bombala
+      <span class="dot">·</span>
+      <kbd>P</kbd> duraklat
+    </p>
+
+    <button class="bomb-btn" id="bombBtn" type="button" aria-label="Bomba bırak">
+      <span class="bomb-btn__ring" aria-hidden="true"></span>
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <path d="M24 6c1.6 0 2.9 1.3 2.9 2.9v2.3h3.4l-1.4 5.2C34 18.8 37 22.8 37 27.5 37 34.3 31.2 40 24 40S11 34.3 11 27.5c0-4.7 3-8.7 8.1-11.1l-1.4-5.2h3.4V8.9C21.1 7.3 22.4 6 24 6Z" fill="currentColor"/>
+        <path d="M21.4 6h5.2v5.4h-5.2z" fill="currentColor"/>
+      </svg>
+      <span class="bomb-btn__label">BOMBA</span>
+    </button>
+
+    <div class="overlay" id="overlay">
+      <section class="card card--start" id="startCard">
+        <div class="eyebrow">2B BOMBARDIMAN</div>
+        <h1 class="title">GÖK<span>AVCI</span></h1>
+        <p class="lede">Gökyüzü senin, toprak hedef. Kırmızı üsleri tek tek yok et ve dalgaları temizle.</p>
+
+        <div class="how">
+          <div class="how-item">
+            <span class="how-icon" aria-hidden="true">✈</span>
+            <div><strong>UÇ</strong><span>WASD / oklar ya da parmağınla sürükle</span></div>
+          </div>
+          <div class="how-item">
+            <span class="how-icon how-icon--bomb" aria-hidden="true">●</span>
+            <div><strong>BOMBALA</strong><span>Boşluk / BOMBA butonu — basılı tut</span></div>
+          </div>
+          <div class="how-item">
+            <span class="how-icon how-icon--target" aria-hidden="true">◎</span>
+            <div><strong>YOK ET</strong><span>Kırmızı bayraklı üsleri vur, puan topla</span></div>
+          </div>
+        </div>
+
+        <button class="cta" id="startBtn" type="button">
+          <span>GÖREVE BAŞLA</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h14m-5-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <p class="footnote">Bombalar yavaş düşer — nişanını iyi al. Cephane kendini yavaşça yeniler.</p>
+      </section>
+
+      <section class="card card--pause hidden" id="pauseCard">
+        <div class="eyebrow">KISA MOLA</div>
+        <h2 class="pause-title">DURAKLATILDI</h2>
+        <p class="lede">Motorlar rölantide. Hazır olduğunda göreve dön.</p>
+        <div class="pause-actions">
+          <button class="cta" id="resumeBtn" type="button"><span>DEVAM ET</span></button>
+          <button class="cta cta--ghost" id="restartBtn" type="button"><span>YENİDEN BAŞLAT</span></button>
+        </div>
+        <p class="footnote">İpucu: Bombalar uçağın hızını da taşır. Alçaktan ve hızlı geçmek daha isabetli olabilir.</p>
+      </section>
+    </div>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>
